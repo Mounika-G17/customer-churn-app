@@ -6,20 +6,33 @@ import pickle
 model = pickle.load(open("model.pkl", "rb"))
 columns = pickle.load(open("columns.pkl", "rb"))
 
+# Title
 st.title("📊 Customer Churn Prediction App")
-
 st.write("Enter customer details below:")
 
-# Inputs
-tenure = st.slider("Tenure (months)", 0, 72, 12)
-monthly_charges = st.number_input("Monthly Charges", value=50.0)
+# Sidebar Inputs (Professional UI)
+st.sidebar.header("Customer Inputs")
 
-contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
-internet = st.selectbox("Internet Service", ["DSL", "Fiber optic", "No"])
-payment = st.selectbox("Payment Method", [
-    "Electronic check", "Mailed check",
-    "Bank transfer (automatic)", "Credit card (automatic)"
-])
+tenure = st.sidebar.slider("Tenure (months)", 0, 72, 12)
+monthly_charges = st.sidebar.number_input("Monthly Charges", value=50.0)
+
+contract = st.sidebar.selectbox(
+    "Contract", ["Month-to-month", "One year", "Two year"]
+)
+
+internet = st.sidebar.selectbox(
+    "Internet Service", ["DSL", "Fiber optic", "No"]
+)
+
+payment = st.sidebar.selectbox(
+    "Payment Method",
+    [
+        "Electronic check",
+        "Mailed check",
+        "Bank transfer (automatic)",
+        "Credit card (automatic)",
+    ],
+)
 
 # Create input dataframe
 input_dict = {
@@ -27,47 +40,40 @@ input_dict = {
     "MonthlyCharges": monthly_charges,
     "Contract": contract,
     "InternetService": internet,
-    "PaymentMethod": payment
+    "PaymentMethod": payment,
 }
 
 input_df = pd.DataFrame([input_dict])
 
-# Apply same encoding
+# Apply encoding
 input_df = pd.get_dummies(input_df)
 
-# Match columns
+# Match training columns
 input_df = input_df.reindex(columns=columns, fill_value=0)
 
-# Prediction
-'''if st.button("Predict"):
-    prediction = model.predict(input_df)[0]
-
-    if prediction == 1:
-        st.error("⚠️ Customer will churn")
-    else:
-        st.success("✅ Customer will not churn")'''
+# Predict button
 if st.button("Predict"):
 
     # Prediction
     prediction = model.predict(input_df)[0]
 
-    # Probability (Advanced)
+    # Probability
     prob = model.predict_proba(input_df)[0][1]
 
-    # Result Display
+    # Result
     if prediction == 1:
         st.error("⚠️ Customer is likely to churn")
     else:
         st.success("✅ Customer will not churn")
 
-    # Show Probability
-    st.write(f"🔢 Churn Probability: {prob:.2f}")
+    # Probability display
+    st.metric(label="Churn Probability", value=f"{prob:.2f}")
 
     # Explanation
     st.info("""
-    📊 Prediction Logic:
-    - Low tenure → Higher chance of churn
-    - High monthly charges → Higher risk
-    - Month-to-month contract → More churn
-    - Long-term contract → Less churn
-    """)
+📊 Prediction Logic:
+- Low tenure → Higher chance of churn
+- High monthly charges → Higher risk
+- Month-to-month contract → More churn
+- Long-term contract → Less churn
+""")
