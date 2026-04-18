@@ -39,10 +39,35 @@ input_df = pd.get_dummies(input_df)
 input_df = input_df.reindex(columns=columns, fill_value=0)
 
 # Prediction
-if st.button("Predict"):
+'''if st.button("Predict"):
     prediction = model.predict(input_df)[0]
 
     if prediction == 1:
         st.error("⚠️ Customer will churn")
     else:
+        st.success("✅ Customer will not churn")'''
+if st.button("Predict"):
+
+    # Prediction
+    prediction = model.predict(input_df)[0]
+
+    # Probability (Advanced)
+    prob = model.predict_proba(input_df)[0][1]
+
+    # Result Display
+    if prediction == 1:
+        st.error("⚠️ Customer is likely to churn")
+    else:
         st.success("✅ Customer will not churn")
+
+    # Show Probability
+    st.write(f"🔢 Churn Probability: {prob:.2f}")
+
+    # Explanation
+    st.info("""
+    📊 Prediction Logic:
+    - Low tenure → Higher chance of churn
+    - High monthly charges → Higher risk
+    - Month-to-month contract → More churn
+    - Long-term contract → Less churn
+    """)
